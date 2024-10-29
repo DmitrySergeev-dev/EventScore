@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 
@@ -10,16 +11,22 @@ class NewsStatus(str, Enum):
     NOT_SCORED: str = "в обработке"
 
 
+@dataclass
+class NewsData:
+    description: str
+    deadline: str
+    status: str
+
+
 class News:
     DATETIME_PATTERN = "%Y-%m-%d %H:%M:%S"
 
     def __init__(self,
                  description: str,
-                 deadline: datetime,
-                 status: NewsStatus = NewsStatus.NOT_SCORED):
+                 deadline: datetime):
         self.description = description
         self.deadline = deadline
-        self.status = status
+        self.status = NewsStatus.NOT_SCORED
         self.events: list[Event] = []
 
     def to_dict(self):
