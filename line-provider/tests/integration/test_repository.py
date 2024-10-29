@@ -8,6 +8,14 @@ from src.domain.model import News, NewsStatus
 from .redis_client import r
 
 
+@pytest.fixture(autouse=True, scope="session")  # fixme не запускается почему то
+async def setup_and_teardown():
+    await r.flushdb(asynchronous=True)
+    yield
+    await r.flushdb(asynchronous=True)
+    await r.close()
+
+
 @pytest.fixture(scope="session")
 def event_loop():
     try:
@@ -32,6 +40,7 @@ class TestRedisRepository:
         assert res.description == news.description
         assert res.status == news.status
         assert res.deadline == news.deadline_as_str
+        await self.repo.flush()  # todo автоматизировать
 
     async def test_get_by_status(self):
         deadline = datetime.now() + timedelta(days=1)
@@ -42,3 +51,5 @@ class TestRedisRepository:
         filtered_news = await self.repo.get_by_status(status=NewsStatus.SCORED_GOOD)
         for news in filtered_news:
             assert news.status == NewsStatus.SCORED_GOOD
+
+        await self.repo.flush()  # todo автоматизировать

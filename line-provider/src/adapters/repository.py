@@ -79,3 +79,6 @@ class RedisRepository(AbstractRepository):
     async def get_pkeys(self) -> [str]:
         pkeys = await self._redis.keys(f'{self.HASH_PREFIX}*')
         return pkeys
+
+    async def flush(self):
+        await self._redis.flushdb(asynchronous=True)
