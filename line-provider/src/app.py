@@ -1,15 +1,18 @@
 import uvicorn
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from core.config import settings
+from api import router as api_router
 
 app = FastAPI()
-
-
-@app.get("/")
-def read_root():
-    html_content = "<h2>Hello LINE-PROVIDER!</h2>"
-    return HTMLResponse(content=html_content)
-
+app.include_router(
+    api_router,
+    prefix=settings.api.prefix
+)
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="0.0.0.0", port=8005, reload=True)
+    uvicorn.run(
+        "app:app",
+        host=settings.run.host,
+        port=settings.run.port,
+        reload=True
+    )
