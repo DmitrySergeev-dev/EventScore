@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from pydantic import RedisDsn
 from pydantic_settings import BaseSettings
 
 
@@ -11,9 +12,14 @@ class ApiPrefix(BaseModel):
     prefix: str = "/api"
 
 
+class DatabaseConfig(BaseModel):
+    url: RedisDsn
+
+
 class Settings(BaseSettings):
     run: RunConfig = RunConfig()
     api: ApiPrefix = ApiPrefix()
+    db: DatabaseConfig
 
 
 settings = Settings()
