@@ -31,6 +31,7 @@ class TestRedisRepository:
     repo = RedisRepository(redis=r)
 
     async def test_add(self):
+        await self.repo.flush()
         news = News(
             description="Новость дня",
             deadline=datetime.now() + timedelta(days=1)
@@ -51,5 +52,17 @@ class TestRedisRepository:
         filtered_news = await self.repo.get_by_status(status=NewsStatus.SCORED_GOOD)
         for news in filtered_news:
             assert news.status == NewsStatus.SCORED_GOOD
+
+        await self.repo.flush()  # todo автоматизировать
+
+    async def test_get_not_expired(self):
+        await self.repo.flush()
+        deadline = datetime.now() + timedelta(days=1)
+        news = News(description=f'Новость старая', deadline=deadline)
+        await self.repo.add(news=news)
+        filtered_news = await self.repo.get_not_expired()
+        for news in filtered_news:
+            news_deadline = datetime.strptime(news.deadline, News.DATETIME_PATTERN)
+            assert news_deadline > datetime.now()
 
         await self.repo.flush()  # todo автоматизировать

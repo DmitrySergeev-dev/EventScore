@@ -1,4 +1,5 @@
 import abc
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from src.core.utils import gen_timestamp_hash
@@ -27,6 +28,10 @@ class AbstractRepository(abc.ABC):
         news = await self._get_by_status(status)
         return news
 
+    async def get_not_expired(self) -> [model.NewsData]:
+        news = await self._get_not_expired()
+        return news
+
     async def update(self, pk: str, **kwargs) -> model.NewsData:
         news = await self._update(pk=pk, **kwargs)
         return news
@@ -37,6 +42,10 @@ class AbstractRepository(abc.ABC):
 
     @abc.abstractmethod
     async def _get(self, pk: str) -> model.NewsData:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    async def _get_not_expired(self) -> [model.NewsData]:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -69,6 +78,21 @@ class RedisRepository(AbstractRepository):
         pkeys = await self.get_pkeys()
         news = [await self._get(pk=pk) for pk in pkeys]
         news = list(filter(lambda data: data.status == status, news))
+        return news
+
+    async def _get_not_expired(self) -> [model.NewsData]:
+        pkeys = await self.get_pkeys()
+        news = [await self._get(pk=pk) for pk in pkeys]
+        current_datetime = datetime.now()
+        news = list(
+            filter(
+                lambda data: datetime.strptime(
+                    data.deadline,
+                    model.News.DATETIME_PATTERN
+                ) < current_datetime,
+                news
+            )
+        )
         return news
 
     async def _update(self, pk: str, **kwargs) -> model.NewsData:
