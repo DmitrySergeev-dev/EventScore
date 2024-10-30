@@ -6,18 +6,6 @@ class Event:
 
 
 @dataclass
-class Created(Event):
-    news_id: str
-    deadline: str
-    description: str
-    status: str
-
-
-@dataclass
-class Deleted(Event):
-    news_id: str
-
-
-@dataclass
-class Updated(Event):
-    news_id: str
+class NewsScored(Event):
+    news_hash: str
+    score_value: int
