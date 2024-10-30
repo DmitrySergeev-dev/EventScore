@@ -10,18 +10,13 @@ if TYPE_CHECKING:
 
 
 class AbstractRepository(abc.ABC):
-    def __init__(self):
-        self.seen: set[model.NewsData] = set()
 
     async def add(self, news: model.News) -> model.NewsData:
         result = await self._add(news)
-        self.seen.add(news)
         return result
 
     async def get(self, pk: str) -> model.NewsData:
         news = await self._get(pk)
-        if news:
-            self.seen.add(news)
         return news
 
     async def get_by_status(self, status: str) -> [model.NewsData]:
