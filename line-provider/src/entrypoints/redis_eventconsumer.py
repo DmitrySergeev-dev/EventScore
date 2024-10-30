@@ -13,14 +13,18 @@ if TYPE_CHECKING:
     from pydantic import RedisDsn
 
 from src.core.config import settings
+from src.adapters.repository import get_redis_repository
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-bus = bootstrap.bootstrap()
+bus = bootstrap.bootstrap(repository=get_redis_repository())
 
 
 def gen_event(channel_name: str, data: dict[str:Any]) -> events.Event:
-    cls = getattr(events, channel_name)
+    try:
+        cls = getattr(events, channel_name)
+    except AttributeError:
+        raise RuntimeError(f'Нет такого события: "{channel_name}"')
     try:
         event = cls(**data)
     except TypeError:
@@ -41,7 +45,7 @@ async def run_event_listener(url: "RedisDsn", channels_names: Iterable[str]):
                 raise WrongMessage("Не корректная структура сообщения об оценке события!")
             event = gen_event(channel_name=message["channel"], data=data_json)
             logger.info("Got message: %r", data_json)
-            bus.handle(message=event)
+            await bus.handle(message=event)
 
 
 if __name__ == "__main__":

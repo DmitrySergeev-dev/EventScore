@@ -2,6 +2,9 @@ import abc
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+import aioredis
+
+from src.core.config import settings
 from src.core.utils import gen_timestamp_hash
 from src.domain import model
 
@@ -101,3 +104,8 @@ class RedisRepository(AbstractRepository):
 
     async def flush(self):
         await self._redis.flushdb(asynchronous=True)
+
+
+def get_redis_repository() -> RedisRepository:
+    redis_instance = aioredis.from_url(str(settings.db.url), decode_responses=True)
+    return RedisRepository(redis=redis_instance)
