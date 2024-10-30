@@ -64,12 +64,14 @@ class RedisRepository(AbstractRepository):
 
     async def _add(self, news: model.News) -> model.NewsData:
         pk = f"{self.HASH_PREFIX}{gen_timestamp_hash()}"
-        await self._redis.hset(name=pk, mapping=news.to_dict())
+        async with self._redis.client() as conn:
+            await conn.hset(name=pk, mapping=news.to_dict())
         result = await self._get(pk=pk)
         return result
 
     async def _get(self, pk: str) -> model.NewsData:
-        result = await self._redis.hgetall(name=pk)
+        async with self._redis.client() as conn:
+            result = await conn.hgetall(name=pk)
         return model.NewsData(**result)
 
     async def _get_by_status(self, status: str) -> [model.NewsData]:
@@ -94,12 +96,14 @@ class RedisRepository(AbstractRepository):
         return news
 
     async def _update(self, pk: str, **kwargs) -> model.NewsData:
-        await self._redis.hset(pk, mapping=kwargs)
+        async with self._redis.client() as conn:
+            await conn.hset(pk, mapping=kwargs)
         result = await self._get(pk=pk)
         return result
 
     async def get_pkeys(self) -> [str]:
-        pkeys = await self._redis.keys(f'{self.HASH_PREFIX}*')
+        async with self._redis.client() as conn:
+            pkeys = await conn.keys(f'{self.HASH_PREFIX}*')
         return pkeys
 
     async def flush(self):
