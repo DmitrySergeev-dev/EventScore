@@ -58,20 +58,18 @@ class AbstractRepository(abc.ABC):
 class RedisRepository(AbstractRepository):
     HASH_PREFIX = "News_"
 
-    def __init__(self, redis: "Redis"):
-        self._redis = redis
+    def __init__(self, session: "Redis"):
+        self.session = session
         super().__init__()
 
     async def _add(self, news: model.News) -> model.NewsData:
         pk = f"{self.HASH_PREFIX}{gen_timestamp_hash()}"
-        async with self._redis.client() as conn:
-            await conn.hset(name=pk, mapping=news.to_dict())
+        await self.session.hset(name=pk, mapping=news.to_dict())
         result = await self._get(pk=pk)
         return result
 
     async def _get(self, pk: str) -> model.NewsData:
-        async with self._redis.client() as conn:
-            result = await conn.hgetall(name=pk)
+        result = await self.session.hgetall(name=pk)
         return model.NewsData(**result)
 
     async def _get_by_status(self, status: str) -> [model.NewsData]:
@@ -96,20 +94,18 @@ class RedisRepository(AbstractRepository):
         return news
 
     async def _update(self, pk: str, **kwargs) -> model.NewsData:
-        async with self._redis.client() as conn:
-            await conn.hset(pk, mapping=kwargs)
+        await self.session.hset(pk, mapping=kwargs)
         result = await self._get(pk=pk)
         return result
 
     async def get_pkeys(self) -> [str]:
-        async with self._redis.client() as conn:
-            pkeys = await conn.keys(f'{self.HASH_PREFIX}*')
+        pkeys = await self.session.keys(f'{self.HASH_PREFIX}*')
         return pkeys
 
     async def flush(self):
-        await self._redis.flushdb(asynchronous=True)
+        await self.session.flushdb(asynchronous=True)
 
 
 def get_redis_repository() -> RedisRepository:
     redis_instance = aioredis.from_url(str(settings.db.url), decode_responses=True)
-    return RedisRepository(redis=redis_instance)
+    return RedisRepository(session=redis_instance)
