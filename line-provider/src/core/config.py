@@ -1,6 +1,10 @@
+from pathlib import Path
+
 from pydantic import BaseModel
 from pydantic import RedisDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+ENV_PATH = Path(__file__).parent.parent.parent
 
 
 class RunConfig(BaseModel):
@@ -18,7 +22,10 @@ class DatabaseConfig(BaseModel):
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=("../../.env.template", "../../.env"),
+        env_file=(
+            ENV_PATH.joinpath(".env.template"),
+            ENV_PATH.joinpath(".env")
+        ),
         case_sensitive=False,
         env_nested_delimiter="__",
         env_prefix="LINE_PROVIDER_CONFIG__"
