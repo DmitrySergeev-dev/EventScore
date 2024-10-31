@@ -10,7 +10,6 @@ from src.domain import events
 from src.domain.exceptions import WrongMessage
 
 if TYPE_CHECKING:
-    from pydantic import RedisDsn
     from src.service_layer.messagebus import MessageBus
 
 from src.core.config import settings
@@ -19,7 +18,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def gen_event(channel_name: str, data: dict[str:Any]) -> events.Event:
+def gen_event(channel_name: str, data: dict[str, Any]) -> events.Event:
     try:
         cls = getattr(events, channel_name)
     except AttributeError:
@@ -32,7 +31,7 @@ def gen_event(channel_name: str, data: dict[str:Any]) -> events.Event:
 
 
 async def run_event_listener(
-        url: "RedisDsn",
+        url: str,
         channels_names: Iterable[str],
         msg_bus: "MessageBus"
 ):

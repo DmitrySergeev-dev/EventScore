@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List, Dict, Callable, Type, TYPE_CHECKING
 
-from src.domain import events
+from src.domain import events, commands
 
 if TYPE_CHECKING:
     from src.service_layer.unit_of_work import AbstractUnitOfWork
@@ -19,4 +19,4 @@ async def update_news_status(event: events.NewsScored,
 EVENT_HANDLERS: Dict[Type[events.Event], List[Callable]] = {
     events.NewsScored: [update_news_status],
 }
-COMMAND_HANDLERS: Dict[Type[events.Event], List[Callable]] = {}
+COMMAND_HANDLERS: Dict[Type[commands.Command], List[Callable]] = {}

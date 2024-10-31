@@ -27,11 +27,11 @@ class AbstractRepository(abc.ABC):
         news = await self._get(pk)
         return news
 
-    async def get_by_status(self, status: str) -> [NewsObject]:
+    async def get_by_status(self, status: str) -> list[NewsObject]:
         news = await self._get_by_status(status)
         return news
 
-    async def get_not_expired(self) -> [NewsObject]:
+    async def get_not_expired(self) -> list[NewsObject]:
         news = await self._get_not_expired()
         return news
 
@@ -48,15 +48,15 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def _get_not_expired(self) -> [NewsObject]:
+    async def _get_not_expired(self) -> list[NewsObject]:
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def _get_by_status(self, status: str) -> [NewsObject]:
+    async def _get_by_status(self, status: str) -> list[NewsObject]:
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def _update(self, pk: str, **kwargs) -> [model.NewsData]:
+    async def _update(self, pk: str, **kwargs) -> model.NewsData:
         raise NotImplementedError
 
 
@@ -77,7 +77,7 @@ class RedisRepository(AbstractRepository):
         result = await self.session.hgetall(name=pk)
         return model.NewsData(**result)
 
-    async def _get_by_status(self, status: str) -> [NewsObject]:
+    async def _get_by_status(self, status: str) -> list[NewsObject]:
         pkeys = await self.get_pkeys()
         news = list()
         for pk in pkeys:
@@ -89,7 +89,7 @@ class RedisRepository(AbstractRepository):
             )
         return news
 
-    async def _get_not_expired(self) -> [NewsObject]:
+    async def _get_not_expired(self) -> list[NewsObject]:
         pkeys = await self.get_pkeys()
         current_datetime = datetime.now()
         news = list()
@@ -108,7 +108,7 @@ class RedisRepository(AbstractRepository):
         result = await self._get(pk=pk)
         return result
 
-    async def get_pkeys(self) -> [str]:
+    async def get_pkeys(self) -> list[str]:
         pkeys = await self.session.keys(f'{self.HASH_PREFIX}*')
         return pkeys
 

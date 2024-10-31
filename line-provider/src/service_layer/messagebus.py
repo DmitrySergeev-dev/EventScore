@@ -18,12 +18,12 @@ class MessageBus:
             self,
             uow: unit_of_work.AbstractUnitOfWork,
             event_handlers: Dict[Type[events.Event], List[Callable]],
-            command_handlers: Dict[Type[commands.Command], List[Callable]],
+            command_handlers: Dict[Type[commands.Command], List[Callable]]
     ):
         self.uow = uow
         self.event_handlers = event_handlers
         self.command_handlers = command_handlers
-        self.queue = list()
+        self.queue: list[Message] = list()
 
     async def handle(self, message: Message):
         self.queue.append(message)
@@ -47,9 +47,10 @@ class MessageBus:
 
     async def handle_command(self, command: commands.Command):
         logger.debug("Обработка команды: %s", command)
-        try:
-            handler = self.command_handlers[type(command)]
-            await handler(command)
-        except Exception:
-            logger.exception('Ошибка при обработке команды: %s', command)
-            raise
+        for handler in self.command_handlers[type(command)]:
+            try:
+                logger.debug('Обработка команды: %s обработчиком: %s', command, handler)
+                await handler(command)
+            except Exception:
+                logger.exception('Ошибка при обработке команды: %s', command)
+                raise
