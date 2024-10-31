@@ -11,7 +11,7 @@ class NewsStatus(str, Enum):
     NOT_SCORED: str = "в обработке"
 
 
-@dataclass
+@dataclass(slots=True, frozen=True)
 class NewsData:
     description: str
     deadline: str
