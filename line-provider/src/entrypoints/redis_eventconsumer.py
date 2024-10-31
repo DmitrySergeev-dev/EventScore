@@ -11,12 +11,12 @@ from src.domain.exceptions import WrongMessage
 
 if TYPE_CHECKING:
     from pydantic import RedisDsn
+    from src.service_layer.messagebus import MessageBus
 
 from src.core.config import settings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-bus = bootstrap.bootstrap()
 
 
 def gen_event(channel_name: str, data: dict[str:Any]) -> events.Event:
@@ -31,7 +31,11 @@ def gen_event(channel_name: str, data: dict[str:Any]) -> events.Event:
     return event
 
 
-async def run_event_listener(url: "RedisDsn", channels_names: Iterable[str]):
+async def run_event_listener(
+        url: "RedisDsn",
+        channels_names: Iterable[str],
+        msg_bus: "MessageBus"
+):
     redis = aioredis.from_url(url, decode_responses=True)
     psub = redis.pubsub(ignore_subscribe_messages=True)
     async with psub as p:
@@ -44,12 +48,13 @@ async def run_event_listener(url: "RedisDsn", channels_names: Iterable[str]):
                 raise WrongMessage("Не корректная структура сообщения об оценке события!")
             event = gen_event(channel_name=message["channel"], data=data_json)
             logger.info("Got message: %r", data_json)
-            await bus.handle(message=event)
+            await msg_bus.handle(message=event)
 
 
 if __name__ == "__main__":
     redis_url = str(settings.db.url)
     channels = ["NewsScored"]
+    bus = bootstrap.bootstrap()
     asyncio.run(
-        run_event_listener(url=redis_url, channels_names=channels)
+        run_event_listener(url=redis_url, channels_names=channels, msg_bus=bus)
     )
