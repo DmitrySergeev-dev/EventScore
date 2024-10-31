@@ -2,6 +2,7 @@ import asyncio
 
 import pytest
 from aioredis import Redis
+from redis import Redis as SyncRedis
 
 from src.adapters.repository import RedisRepository
 from src.service_layer.unit_of_work import RedisUnitOfWork
@@ -35,3 +36,11 @@ def redis_repo(redis_session):
 @pytest.fixture(scope="session")
 def redis_uow(redis_session):
     return RedisUnitOfWork(session=redis_session)
+
+
+@pytest.fixture(scope='function', autouse=True)
+def flush_redis(redis_url):
+    redis = SyncRedis.from_url(url=redis_url)
+    redis.flushdb()
+    yield
+    redis.flushdb()

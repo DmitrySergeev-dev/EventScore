@@ -28,7 +28,6 @@ async def publish_message(channel_name: str, message: dict, redis_url: str):
 
 @pytest.mark.asyncio
 async def test_handle_news_scored(redis_repo, redis_url, messagebus):
-    await redis_repo.flush()  # todo автоматизировать
     news = News(
         description="Test News",
         deadline=datetime.now() + timedelta(days=2)
@@ -64,5 +63,3 @@ async def test_handle_news_scored(redis_repo, redis_url, messagebus):
     updated_news = await redis_repo.get(pk=news_redis.pk)
 
     assert updated_news.status == NewsStatus.SCORED_GOOD
-
-    await redis_repo.flush()  # todo автоматизировать
