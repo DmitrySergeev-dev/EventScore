@@ -35,9 +35,9 @@ class TestRedisRepository:
         )
         res = await redis_repo.add(news=news)
         assert res
-        assert res.description == news.description
-        assert res.status == news.status
-        assert res.deadline == news.deadline_as_str
+        assert res.data.description == news.description
+        assert res.data.status == news.status
+        assert res.data.deadline == news.deadline_as_str
         await redis_repo.flush()  # todo автоматизировать
 
     async def test_get_by_status(self, redis_repo):
@@ -47,9 +47,7 @@ class TestRedisRepository:
         pkeys = await redis_repo.get_pkeys()
         await redis_repo.update(pk=pkeys[0], status=NewsStatus.SCORED_GOOD)
         filtered_news = await redis_repo.get_by_status(status=NewsStatus.SCORED_GOOD)
-        for news in filtered_news:
-            assert news.status == NewsStatus.SCORED_GOOD
-
+        assert all([news.data.status == NewsStatus.SCORED_GOOD for news in filtered_news])
         await redis_repo.flush()  # todo автоматизировать
 
     async def test_get_not_expired(self, redis_repo):
@@ -58,8 +56,8 @@ class TestRedisRepository:
         news = News(description=f'Новость старая', deadline=deadline)
         await redis_repo.add(news=news)
         filtered_news = await redis_repo.get_not_expired()
-        for news in filtered_news:
-            news_deadline = datetime.strptime(news.deadline, News.DATETIME_PATTERN)
-            assert news_deadline > datetime.now()
-
+        assert all(
+            [datetime.strptime(news.data.deadline, News.DATETIME_PATTERN) > datetime.now()
+             for news in filtered_news]
+        )
         await redis_repo.flush()  # todo автоматизировать

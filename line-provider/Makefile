@@ -8,4 +8,4 @@ mypy:
 	python -m mypy .
 
 test: ## Выполняем тесты на pytest
-	pytest backend/app
+	pytest
