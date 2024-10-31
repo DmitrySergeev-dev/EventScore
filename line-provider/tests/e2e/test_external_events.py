@@ -28,7 +28,7 @@ async def publish_message(channel_name: str, message: dict, redis_url: str):
 
 @pytest.mark.asyncio
 async def test_handle_news_scored(redis_repo, redis_url, messagebus):
-    redis_repo.flush()  # todo автоматизировать
+    await redis_repo.flush()  # todo автоматизировать
     news = News(
         description="Test News",
         deadline=datetime.now() + timedelta(days=2)
@@ -57,7 +57,7 @@ async def test_handle_news_scored(redis_repo, redis_url, messagebus):
     await asyncio.sleep(1)
 
     try:
-        await asyncio.wait_for(asyncio.gather(consumer_task, producer_task), timeout=5.0)
+        await asyncio.wait_for(asyncio.gather(consumer_task, producer_task), timeout=2.0)
     except asyncio.TimeoutError:
         print("Таймаут: задачи не завершились в установленное время.")
 
@@ -65,4 +65,4 @@ async def test_handle_news_scored(redis_repo, redis_url, messagebus):
 
     assert updated_news.status == NewsStatus.SCORED_GOOD
 
-    redis_repo.flush()  # todo автоматизировать
+    await redis_repo.flush()  # todo автоматизировать

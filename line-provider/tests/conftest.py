@@ -1,8 +1,20 @@
+import asyncio
+
 import pytest
 from aioredis import Redis
 
 from src.adapters.repository import RedisRepository
 from src.service_layer.unit_of_work import RedisUnitOfWork
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
 
 
 @pytest.fixture(scope="session")

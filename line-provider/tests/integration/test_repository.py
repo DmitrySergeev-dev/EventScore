@@ -1,4 +1,3 @@
-import asyncio
 from datetime import datetime, timedelta
 
 import pytest
@@ -12,16 +11,6 @@ async def setup_and_teardown(redis_session):
     yield
     await redis_session.flushdb(asynchronous=True)
     await redis_session.close()
-
-
-@pytest.fixture(scope="session")
-def event_loop():
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
 
 
 @pytest.mark.asyncio
