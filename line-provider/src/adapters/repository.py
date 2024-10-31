@@ -1,6 +1,6 @@
 import abc
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 import aioredis
 
@@ -12,9 +12,14 @@ if TYPE_CHECKING:
     from aioredis import Redis
 
 
+class NewsObject(NamedTuple):
+    pk: str
+    data: model.NewsData
+
+
 class AbstractRepository(abc.ABC):
 
-    async def add(self, news: model.News) -> model.NewsData:
+    async def add(self, news: model.News) -> NewsObject:
         result = await self._add(news)
         return result
 
@@ -22,11 +27,11 @@ class AbstractRepository(abc.ABC):
         news = await self._get(pk)
         return news
 
-    async def get_by_status(self, status: str) -> [model.NewsData]:
+    async def get_by_status(self, status: str) -> [NewsObject]:
         news = await self._get_by_status(status)
         return news
 
-    async def get_not_expired(self) -> [model.NewsData]:
+    async def get_not_expired(self) -> [NewsObject]:
         news = await self._get_not_expired()
         return news
 
@@ -35,7 +40,7 @@ class AbstractRepository(abc.ABC):
         return news
 
     @abc.abstractmethod
-    async def _add(self, news: model.News) -> model.NewsData:
+    async def _add(self, news: model.News) -> NewsObject:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -43,11 +48,11 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def _get_not_expired(self) -> [model.NewsData]:
+    async def _get_not_expired(self) -> [NewsObject]:
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def _get_by_status(self, status: str) -> [model.NewsData]:
+    async def _get_by_status(self, status: str) -> [NewsObject]:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -62,35 +67,40 @@ class RedisRepository(AbstractRepository):
         self.session = session
         super().__init__()
 
-    async def _add(self, news: model.News) -> model.NewsData:
+    async def _add(self, news: model.News) -> NewsObject:
         pk = f"{self.HASH_PREFIX}{gen_timestamp_hash()}"
         await self.session.hset(name=pk, mapping=news.to_dict())
         result = await self._get(pk=pk)
-        return result
+        return NewsObject(pk=pk, data=result)
 
     async def _get(self, pk: str) -> model.NewsData:
         result = await self.session.hgetall(name=pk)
         return model.NewsData(**result)
 
-    async def _get_by_status(self, status: str) -> [model.NewsData]:
+    async def _get_by_status(self, status: str) -> [NewsObject]:
         pkeys = await self.get_pkeys()
-        news = [await self._get(pk=pk) for pk in pkeys]
-        news = list(filter(lambda data: data.status == status, news))
+        news = list()
+        for pk in pkeys:
+            data = await self._get(pk=pk)
+            if data.status != status:
+                continue
+            news.append(
+                NewsObject(pk=pk, data=data)
+            )
         return news
 
-    async def _get_not_expired(self) -> [model.NewsData]:
+    async def _get_not_expired(self) -> [NewsObject]:
         pkeys = await self.get_pkeys()
-        news = [await self._get(pk=pk) for pk in pkeys]
         current_datetime = datetime.now()
-        news = list(
-            filter(
-                lambda data: datetime.strptime(
-                    data.deadline,
-                    model.News.DATETIME_PATTERN
-                ) < current_datetime,
-                news
+        news = list()
+        for pk in pkeys:
+            data = await self._get(pk=pk)
+            if datetime.strptime(data.deadline,
+                                 model.News.DATETIME_PATTERN) >= current_datetime:
+                continue
+            news.append(
+                NewsObject(pk=pk, data=data)
             )
-        )
         return news
 
     async def _update(self, pk: str, **kwargs) -> model.NewsData:

@@ -42,7 +42,7 @@ class News:
 
     @status.setter
     def status(self, value):
-        expected_values = (status.value for status in NewsStatus)
+        expected_values = (s.value for s in NewsStatus)
         if value not in expected_values:
             raise ValueError
         self._status = value
