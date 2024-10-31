@@ -5,14 +5,15 @@ from typing import List, Dict, Callable, Type, TYPE_CHECKING
 from src.domain import events
 
 if TYPE_CHECKING:
-    from src.adapters.repository import AbstractRepository
+    from src.service_layer.unit_of_work import AbstractUnitOfWork
 from src.domain.model import News
 
 
 async def update_news_status(event: events.NewsScored,
-                             repository: "AbstractRepository"):
+                             uow: "AbstractUnitOfWork"):
     status = News.define_status_by_score(score_value=event.score_value)
-    await repository.update(pk=event.news_hash, status=status)
+    async with uow:
+        await uow.repo.update(pk=event.news_hash, status=status)
 
 
 EVENT_HANDLERS: Dict[Type[events.Event], List[Callable]] = {

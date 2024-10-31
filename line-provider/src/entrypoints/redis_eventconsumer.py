@@ -13,11 +13,10 @@ if TYPE_CHECKING:
     from pydantic import RedisDsn
 
 from src.core.config import settings
-from src.adapters.repository import get_redis_repository
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-bus = bootstrap.bootstrap(repository=get_redis_repository())
+bus = bootstrap.bootstrap()
 
 
 def gen_event(channel_name: str, data: dict[str:Any]) -> events.Event:

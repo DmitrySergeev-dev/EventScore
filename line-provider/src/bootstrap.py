@@ -1,16 +1,13 @@
 import inspect
 from typing import Callable, Any
-from typing import TYPE_CHECKING
 
-from src.adapters.repository import RedisRepository
-from src.service_layer import handlers, messagebus
-
-if TYPE_CHECKING:
-    from src.adapters.repository import AbstractRepository
+from src.service_layer import handlers, messagebus, unit_of_work
 
 
-def bootstrap(repository: "AbstractRepository" = RedisRepository) -> messagebus.MessageBus:
-    dependencies = {"repository": repository}
+def bootstrap(
+        uow: unit_of_work.AbstractUnitOfWork = unit_of_work.RedisUnitOfWork()
+) -> messagebus.MessageBus:
+    dependencies = {"uow": uow}
     injected_event_handlers = {
         event_type: [
             inject_dependencies(handler, dependencies)
@@ -24,7 +21,7 @@ def bootstrap(repository: "AbstractRepository" = RedisRepository) -> messagebus.
     }
 
     return messagebus.MessageBus(
-        repository=repository,
+        uow=uow,
         event_handlers=injected_event_handlers,
         command_handlers=injected_command_handlers,
     )

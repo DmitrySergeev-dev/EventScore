@@ -6,7 +6,7 @@ from typing import Callable, Dict, List, Union, Type, TYPE_CHECKING
 from src.domain import commands, events
 
 if TYPE_CHECKING:
-    from src.adapters.repository import AbstractRepository
+    from src.service_layer import unit_of_work
 
 logger = logging.getLogger(__name__)
 
@@ -16,11 +16,11 @@ Message = Union[commands.Command, events.Event]
 class MessageBus:
     def __init__(
             self,
-            repository: "AbstractRepository",
+            uow: unit_of_work.AbstractUnitOfWork,
             event_handlers: Dict[Type[events.Event], List[Callable]],
-            command_handlers: Dict[Type[commands.Command], Callable],
+            command_handlers: Dict[Type[commands.Command], List[Callable]],
     ):
-        self.repo = repository
+        self.uow = uow
         self.event_handlers = event_handlers
         self.command_handlers = command_handlers
         self.queue = list()
@@ -34,22 +34,22 @@ class MessageBus:
             elif isinstance(message, commands.Command):
                 await self.handle_command(message)
             else:
-                raise Exception(f"{message} was not an Event or Command")
+                raise Exception(f'"{message}" не является ни событием, ни командой!')
 
     async def handle_event(self, event: events.Event):
         for handler in self.event_handlers[type(event)]:
             try:
-                logger.debug("handling event %s with handler %s", event, handler)
+                logger.debug('Обработка события: %s обработчиком: %s', event, handler)
                 await handler(event)
-            except Exception:
-                logger.exception("Exception handling event %s", event)
+            except Exception as e:
+                logger.exception('Ошибка при обработке события %s: %r', event, e)
                 continue
 
     async def handle_command(self, command: commands.Command):
-        logger.debug("handling command %s", command)
+        logger.debug("Обработка команды: %s", command)
         try:
             handler = self.command_handlers[type(command)]
             await handler(command)
         except Exception:
-            logger.exception("Exception handling command %s", command)
+            logger.exception('Ошибка при обработке команды: %s', command)
             raise
