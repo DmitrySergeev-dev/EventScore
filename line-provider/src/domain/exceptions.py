@@ -13,3 +13,8 @@ class BaseServiceException(Exception):
 class WrongMessage(BaseServiceException):
     """Не корректное сообщение"""
     MESSAGE = "Получено сообщение с некорректной структурой!"
+
+
+class NewsNotFound(BaseServiceException):
+    """Событие не найдено"""
+    MESSAGE = "Событие не найдено"

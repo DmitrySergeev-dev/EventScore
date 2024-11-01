@@ -9,6 +9,14 @@ from src.domain.model import NewsStatus
 class NewsSchema(BaseModel):
     description: str
     deadline: datetime
+
+
+class NewsSchemaEdit(NewsSchema):
+    status: NewsStatus | None = None
+
+
+class NewsSchemaOut(NewsSchema):
+    pk: str
     status: NewsStatus
 
 

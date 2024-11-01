@@ -1,12 +1,13 @@
 import abc
 from datetime import datetime
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple, Iterable
 
 import aioredis
 
 from src.core.config import settings
 from src.core.utils import gen_timestamp_hash
 from src.domain import model
+from src.domain.exceptions import NewsNotFound
 
 if TYPE_CHECKING:
     from aioredis import Redis
@@ -59,6 +60,13 @@ class AbstractRepository(abc.ABC):
     async def _update(self, pk: str, **kwargs) -> model.NewsData:
         raise NotImplementedError
 
+    @abc.abstractmethod
+    async def get_all(self,
+                      limit: int | None = None,
+                      offset: int | None = None,
+                      **kwargs) -> Iterable[model.NewsData]:
+        raise NotImplementedError
+
 
 class RedisRepository(AbstractRepository):
     HASH_PREFIX = "News_"
@@ -75,7 +83,9 @@ class RedisRepository(AbstractRepository):
 
     async def _get(self, pk: str) -> model.NewsData:
         result = await self.session.hgetall(name=pk)
-        return model.NewsData(**result)
+        if not result:
+            raise NewsNotFound
+        return model.NewsData(pk=pk, **result)
 
     async def _get_by_status(self, status: str) -> list[NewsObject]:
         pkeys = await self.get_pkeys()
@@ -114,6 +124,16 @@ class RedisRepository(AbstractRepository):
 
     async def flush(self):
         await self.session.flushdb(asynchronous=True)
+
+    async def get_all(self,
+                      limit: int | None = None,
+                      offset: int | None = None,
+                      **kwargs) -> Iterable[model.NewsData]:
+        pkeys = await self.get_pkeys()
+        news_list = [await self._get(pk=pk) for pk in pkeys]
+        if not all([limit, offset]):
+            return news_list
+        return news_list[offset:offset + limit]
 
 
 def get_redis_repository() -> RedisRepository:

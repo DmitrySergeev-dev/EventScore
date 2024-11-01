@@ -10,3 +10,4 @@ router.include_router(
     news_router,
     prefix=settings.api.v1.news,
 )
+

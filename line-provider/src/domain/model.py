@@ -13,6 +13,7 @@ class NewsStatus(str, Enum):
 
 @dataclass(slots=True, frozen=True)
 class NewsData:
+    pk: str
     description: str
     deadline: str
     status: str
