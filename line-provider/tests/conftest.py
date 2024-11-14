@@ -15,6 +15,7 @@ from src.service_layer.unit_of_work import RedisUnitOfWork
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine
+    from typing import AsyncGenerator
 
 
 @pytest.fixture(scope="session")
@@ -67,7 +68,7 @@ async def wait_for_postgres_to_come_up(engine):
 
 
 @pytest_asyncio.fixture(scope="session")
-async def db_engine(db_url) -> "AsyncEngine":
+async def db_engine(db_url) -> "AsyncGenerator[AsyncEngine]":
     engine = create_async_engine(db_url, echo=True)
     await wait_for_postgres_to_come_up(engine=engine)
     async with engine.connect() as conn:  # чтоб вручную управлять транзакциями
@@ -95,7 +96,7 @@ async def db_engine(db_url) -> "AsyncEngine":
 
 
 @pytest_asyncio.fixture(scope="session")
-async def async_session(db_engine) -> "AsyncSession":
+async def async_session(db_engine) -> "AsyncGenerator[AsyncSession]":
     session_maker = async_sessionmaker(
         bind=db_engine,
         autoflush=False,

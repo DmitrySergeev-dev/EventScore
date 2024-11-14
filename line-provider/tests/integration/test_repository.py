@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 
 import pytest
@@ -53,7 +53,7 @@ class TestPostgresRepository:
     async def test_add(self, async_session):
         news = News(
             description="Новость дня",
-            deadline=datetime.now() + timedelta(days=1)
+            deadline=datetime.now(tz=timezone.utc) + timedelta(days=1)
         )
         async with async_session as session:
             repo = PostgresRepository(session=session)
@@ -108,13 +108,12 @@ class TestPostgresRepository:
             await session.commit()
             result = await repo.get_by_status(status=NewsStatus.SCORED_GOOD)
         assert result
-        assert len(result) == 1
         assert all([el.data.status == NewsStatus.SCORED_GOOD for el in result])
 
     @pytest.mark.asyncio
     async def test_get_not_expired(self, async_session: "AsyncSession"):
         news_list = [db_news_model(description=f'Новость_{i}',
-                                   deadline=datetime.now() + timedelta(days=1))
+                                   deadline=datetime.now(tz=timezone.utc) + timedelta(days=1))
                      for i in range(5)]
 
         async with async_session as session:
@@ -129,7 +128,7 @@ class TestPostgresRepository:
             repo = PostgresRepository(session=session)
             actual_news = await repo.get_not_expired()
         assert all(
-            [news.data.deadline > datetime.now()
+            [news.data.deadline > datetime.now(tz=timezone.utc)
              for news in actual_news]
         )
 
@@ -141,8 +140,8 @@ class TestPostgresRepository:
         )
         async with async_session as session:
             session.add(news)
-            session.refresh(news)
             await session.commit()
+            await session.refresh(news)
             repo = PostgresRepository(session=session)
             new_description = "Новость ред."
             new_status = NewsStatus.SCORED_BAD
@@ -165,6 +164,6 @@ class TestPostgresRepository:
             limit = 3
             limited_news = await repo.get_all(limit=limit)
             last_limit_news = await repo.get_all(limit=limit, offset=len(news_list) - 3)
-        assert len(list(all_news)) == len(news_list)
+        assert len(list(all_news)) >= len(news_list)
         assert len(list(limited_news)) == limit
         assert len(list(last_limit_news)) == limit

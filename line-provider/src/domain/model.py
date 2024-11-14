@@ -15,8 +15,8 @@ class NewsStatus(str, Enum):
 class NewsData:
     pk: str
     description: str
-    deadline: str
-    status: str
+    deadline: datetime
+    status: NewsStatus
 
 
 class News:

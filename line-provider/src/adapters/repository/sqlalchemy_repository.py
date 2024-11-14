@@ -19,17 +19,17 @@ class PostgresRepository(AbstractRepository):
         self.session = session
 
     async def _add(self, news: model.News) -> NewsObject:
-        news = News(**news.to_dict())
-        self.session.add(news)
+        db_news = News(**news.to_dict())
+        self.session.add(db_news)
         await self.session.commit()
-        await self.session.refresh(news)
+        await self.session.refresh(db_news)
 
-        return NewsObject(pk=news.pk,
+        return NewsObject(pk=db_news.pk,
                           data=model.NewsData(
-                              pk=news.pk,
-                              description=news.description,
-                              deadline=news.deadline,
-                              status=news.status
+                              pk=db_news.pk,
+                              description=db_news.description,
+                              deadline=db_news.deadline,
+                              status=db_news.status
                           ))
 
     async def _get(self, pk: str) -> model.NewsData:
