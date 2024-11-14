@@ -1,8 +1,22 @@
 from __future__ import annotations
+
 import abc
+from typing import TYPE_CHECKING
+
+from aioredis import Redis
+from sqlalchemy.ext.asyncio import (
+    create_async_engine,
+    async_sessionmaker
+)
+
 from src.adapters import repository
 from src.core.config import settings
-from aioredis import Redis
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import (
+        AsyncSession,
+        AsyncEngine
+    )
 
 
 class AbstractUnitOfWork(abc.ABC):
@@ -12,17 +26,17 @@ class AbstractUnitOfWork(abc.ABC):
         return self
 
     async def __aexit__(self, *args):
-        self.rollback()
+        await self.rollback()
 
-    def commit(self):
-        self._commit()
+    async def commit(self):
+        await self._commit()
 
     @abc.abstractmethod
-    def _commit(self):
+    async def _commit(self):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def rollback(self):
+    async def rollback(self):
         raise NotImplementedError
 
 
@@ -44,8 +58,48 @@ class RedisUnitOfWork(AbstractUnitOfWork):
         await super().__aexit__(*args)
         await self.session.close()
 
-    def _commit(self):  # будет реализовано через pipeline.multi
-        pass
+    @abc.abstractmethod
+    async def _commit(self):
+        raise NotImplementedError
 
-    def rollback(self):  # будет реализовано через pipeline.discard
-        pass
+    @abc.abstractmethod
+    async def rollback(self):
+        raise NotImplementedError
+
+
+class PostgresUnitOfWork(AbstractUnitOfWork):
+    def __init__(self,
+                 url: str,
+                 echo: bool = False,
+                 echo_pool: bool = False,
+                 pool_size: int = 5,
+                 max_overflow: int = 10):
+        self.engine: AsyncEngine = create_async_engine(
+            url=url,
+            echo=echo,
+            echo_pool=echo_pool,
+            pool_size=pool_size,
+            max_overflow=max_overflow,
+        )
+        self.session_maker: async_sessionmaker[AsyncSession] = async_sessionmaker(
+            bind=self.engine,
+            autoflush=False,
+            autocommit=False,
+            expire_on_commit=False,
+        )
+
+    async def __aenter__(self):
+        self.session = await self.session_maker().__aenter__()
+        self.repo = repository.PostgresRepository(session=self.session)
+        return self
+
+    async def __aexit__(self, *args):
+        await self.rollback()
+        await self.session.__aexit__(*args)
+        await self.session.close()
+
+    async def _commit(self):
+        await self.session.commit()
+
+    async def rollback(self):
+        await self.session.rollback()
