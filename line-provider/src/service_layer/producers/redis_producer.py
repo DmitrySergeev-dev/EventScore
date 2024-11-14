@@ -8,7 +8,7 @@ from src.domain.exceptions import RedisConnectionError
 
 
 class RedisProducer:
-    def __init__(self, url: str):
+    def __init__(self, url: str = str(settings.redis.url)):
         self.client = aioredis.from_url(url=url, decode_responses=True)
 
     async def publish(self, channel: str,
@@ -24,8 +24,7 @@ class RedisProducer:
 
 
 async def run_test():
-    url = str(settings.redis.url)
-    producer = RedisProducer(url=url)
+    producer = RedisProducer()
     for i in range(20):
         msg = json.dumps(
             dict(data=f'Message №{i}')

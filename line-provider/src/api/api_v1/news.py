@@ -1,3 +1,4 @@
+import json
 from dataclasses import asdict
 from typing import Annotated, TYPE_CHECKING
 
@@ -5,9 +6,11 @@ from fastapi.exceptions import HTTPException
 
 from src.domain.exceptions import NewsNotFound
 from src.domain.model import News
+from ...domain.commands import NotifyAboutCreatedNews
 
 if TYPE_CHECKING:
     from src.service_layer.unit_of_work import AbstractUnitOfWork
+    from src.service_layer.producers import RedisProducer
 
 from fastapi import (
     APIRouter, Query,
@@ -15,7 +18,7 @@ from fastapi import (
 )
 
 from src.core.schemas.news import NewsSchema, NewsFilterParams, NewsSchemaOut
-from .dependencies import db_uow
+from .dependencies import db_uow, redis_broker
 
 router = APIRouter(
     tags=["News"],
@@ -66,9 +69,18 @@ async def get_news_by_id(
 @router.post("/", response_model=NewsSchemaOut, status_code=status.HTTP_201_CREATED)
 async def create_news(
         data: NewsSchema,
-        uow: Annotated["AbstractUnitOfWork", Depends(db_uow)]):
+        uow: Annotated["AbstractUnitOfWork", Depends(db_uow)],
+        broker: Annotated["RedisProducer", Depends(redis_broker)]):
     async with uow:
         news = await uow.repo.add(
             news=News(**data.dict())
         )
+    command = NotifyAboutCreatedNews(
+        pk=news.pk,
+        deadline=str(news.data.deadline),
+        description=news.data.description,
+        status=news.data.status
+    )
+    msg = json.dumps(asdict(command))
+    await broker.publish(channel="score_maker.news_created", message=msg)
     return NewsSchemaOut(**asdict(news.data))

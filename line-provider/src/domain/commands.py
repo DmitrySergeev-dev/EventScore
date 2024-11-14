@@ -7,8 +7,8 @@ class Command:
 
 
 @dataclass
-class CreateNews(Command):
-    news_id: str
+class NotifyAboutCreatedNews(Command):
+    pk: str
     deadline: str
     description: str
     status: str
