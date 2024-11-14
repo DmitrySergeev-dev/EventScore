@@ -51,9 +51,16 @@ async def run_event_listener(
 
 
 if __name__ == "__main__":
-    redis_url = str(settings.db.url)
+    redis_url = str(settings.redis.url)
     channels = ["NewsScored"]
     bus = bootstrap.bootstrap()
     asyncio.run(
         run_event_listener(url=redis_url, channels_names=channels, msg_bus=bus)
     )
+
+"""
+sdv@sdv-B550M-K:~$ redis-cli -p 6380
+127.0.0.1:6380> publish NewsScored '{"news_hash":"d6880af2-ce5c-4a29-8f84-9c7962392c1d","score_value":5}'
+
+В БД должно измениться значение в поле "status" записи с pk="d6880af2-ce5c-4a29-8f84-9c7962392c1d" 
+"""
