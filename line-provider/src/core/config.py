@@ -22,8 +22,12 @@ class ApiPrefix(BaseModel):
     v1: ApiV1Prefix = ApiV1Prefix()
 
 
-class DatabaseConfig(BaseModel):
+class RedisConfig(BaseModel):
     url: RedisDsn
+
+
+class DBConfig(BaseModel):
+    url: str
 
 
 class Settings(BaseSettings):
@@ -38,7 +42,8 @@ class Settings(BaseSettings):
     )
     run: RunConfig = RunConfig()
     api: ApiPrefix = ApiPrefix()
-    db: DatabaseConfig
+    redis: RedisConfig
+    db: DBConfig
 
 
 settings = Settings()

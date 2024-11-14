@@ -9,3 +9,26 @@ services:
     volumes:
       - ./docker-volumes/redis/data:/data
       - ./docker-volumes/redis/configs/local-redis-stack.conf:/redis-stack.conf
+
+  db:
+    restart: always
+    image: postgres
+    container_name: line-provider-db
+    environment:
+      POSTGRES_DB: line_provider
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+
+  test_db:
+    restart: always
+    image: postgres
+    container_name: test_line-provider-db
+    environment:
+      POSTGRES_DB: test_line_provider
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5434:5432"
+

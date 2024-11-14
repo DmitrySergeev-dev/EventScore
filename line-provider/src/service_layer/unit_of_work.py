@@ -27,7 +27,7 @@ class AbstractUnitOfWork(abc.ABC):
 
 
 DEFAULT_REDIS_SESSION = Redis.from_url(
-    url=str(settings.db.url),
+    url=str(settings.redis.url),
     decode_responses=True
 )
 

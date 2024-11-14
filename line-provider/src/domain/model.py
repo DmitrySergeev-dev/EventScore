@@ -33,7 +33,7 @@ class News:
     def to_dict(self):
         return dict(
             description=self.description,
-            deadline=self.deadline_as_str,
+            deadline=self.deadline,
             status=self.status
         )
 

@@ -1,6 +1,5 @@
-import abc
 from datetime import datetime
-from typing import TYPE_CHECKING, NamedTuple, Iterable
+from typing import TYPE_CHECKING, Iterable
 
 import aioredis
 
@@ -8,64 +7,11 @@ from src.core.config import settings
 from src.core.utils import gen_timestamp_hash
 from src.domain import model
 from src.domain.exceptions import NewsNotFound
+from .base import AbstractRepository
+from .schemas import NewsObject
 
 if TYPE_CHECKING:
     from aioredis import Redis
-
-
-class NewsObject(NamedTuple):
-    pk: str
-    data: model.NewsData
-
-
-class AbstractRepository(abc.ABC):
-
-    async def add(self, news: model.News) -> NewsObject:
-        result = await self._add(news)
-        return result
-
-    async def get(self, pk: str) -> model.NewsData:
-        news = await self._get(pk)
-        return news
-
-    async def get_by_status(self, status: str) -> list[NewsObject]:
-        news = await self._get_by_status(status)
-        return news
-
-    async def get_not_expired(self) -> list[NewsObject]:
-        news = await self._get_not_expired()
-        return news
-
-    async def update(self, pk: str, **kwargs) -> model.NewsData:
-        news = await self._update(pk=pk, **kwargs)
-        return news
-
-    @abc.abstractmethod
-    async def _add(self, news: model.News) -> NewsObject:
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    async def _get(self, pk: str) -> model.NewsData:
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    async def _get_not_expired(self) -> list[NewsObject]:
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    async def _get_by_status(self, status: str) -> list[NewsObject]:
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    async def _update(self, pk: str, **kwargs) -> model.NewsData:
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    async def get_all(self,
-                      limit: int | None = None,
-                      offset: int | None = None,
-                      **kwargs) -> Iterable[model.NewsData]:
-        raise NotImplementedError
 
 
 class RedisRepository(AbstractRepository):
