@@ -5,7 +5,7 @@ from src.service_layer import handlers, messagebus, unit_of_work
 
 
 def bootstrap(
-        uow: unit_of_work.AbstractUnitOfWork = unit_of_work.RedisUnitOfWork()
+        uow: unit_of_work.AbstractUnitOfWork = unit_of_work.PostgresUnitOfWork()
 ) -> messagebus.MessageBus:
     dependencies = {"uow": uow}
     injected_event_handlers = {

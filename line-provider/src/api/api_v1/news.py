@@ -60,7 +60,7 @@ async def get_news_by_id(
                 status_code=404,
                 detail="Событие с таким pk не найдено в базе"
             )
-    return NewsSchemaOut(pk=news_id, **asdict(news))
+    return NewsSchemaOut(**asdict(news))
 
 
 @router.post("/", response_model=NewsSchemaOut, status_code=status.HTTP_201_CREATED)

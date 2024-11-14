@@ -42,7 +42,7 @@ class News(Base):
         comment="Описание новости"
     )
     deadline: Mapped[datetime] = mapped_column(
-        DateTime(timezone=False),
+        DateTime(timezone=True),
         nullable=False,
         comment="Дедлайн для оценки новости"
     )

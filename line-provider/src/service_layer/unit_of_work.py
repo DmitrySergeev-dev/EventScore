@@ -69,7 +69,7 @@ class RedisUnitOfWork(AbstractUnitOfWork):
 
 class PostgresUnitOfWork(AbstractUnitOfWork):
     def __init__(self,
-                 url: str,
+                 url: str = settings.db.url,
                  echo: bool = False,
                  echo_pool: bool = False,
                  pool_size: int = 5,

@@ -41,7 +41,7 @@ def upgrade() -> None:
                   nullable=False,
                   comment='Описание новости'),
         sa.Column('deadline',
-                  sa.DateTime(),
+                  sa.DateTime(timezone=True),
                   nullable=False,
                   comment='Дедлайн для оценки новости'),
         sa.Column('status',
