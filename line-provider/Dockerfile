@@ -1,19 +1,42 @@
-FROM python:3.10-slim
+FROM python:3.10-slim as python-base
 
-ENV POETRY_VERSION=1.6.0
-ENV PATH="/root/.local/bin:$PATH"
+# Set environment variables
+ENV TZ=Europe/Moscow \
+    # python:
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    # poetry:
+    POETRY_VERSION=1.8.3 \
+    POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_CREATE=false \
+    POETRY_CACHE_DIR='/var/cache/pypoetry' \
+    POETRY_HOME='/usr/local' \
+    # Для запуска WSGI сервера
+    PATH="$POETRY_HOME/bin:$PATH"
 
-RUN pip install "poetry==$POETRY_VERSION"
 
-WORKDIR /var/www/line-provider
-COPY pyproject.toml poetry.lock* ./
-RUN poetry config virtualenvs.create false && \
-    poetry install --no-interaction --no-ansi
+WORKDIR /app
 
-RUN poetry install --no-root --no-dev
+# Устанавливаем менеджер для управления зависимостями
+RUN pip install poetry
 
-COPY . ./
+# Устанавливаем зависимости
+COPY poetry.lock pyproject.toml ./
+RUN poetry config virtualenvs.create false
+RUN poetry install
 
-CMD ["fastapi", "run", "src/app.py", "--port", "8005"]
+# Копируем остальной код приложения
+#COPY .env ./
+COPY scripts ./scripts
+COPY alembic.ini ./
+COPY migrations ./migrations
+COPY src ./src
 
-#CMD ["poetry", "run", "python", "your_script.py"]
+# Указываем команду для запуска приложения
+CMD ["uvicorn", "src.entrypoints.app:app", "--host", "0.0.0.0", "--port", "8005"]
+
+
+
+
+
+
