@@ -95,7 +95,7 @@ async def db_engine(db_url) -> "AsyncGenerator[AsyncEngine]":
         await engine.dispose()
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session", autouse=True)
 async def async_session(db_engine) -> "AsyncGenerator[AsyncSession]":
     session_maker = async_sessionmaker(
         bind=db_engine,

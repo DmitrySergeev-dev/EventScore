@@ -3,6 +3,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 
 from src.api.api_v1 import dependencies
+from src.core.config import settings
 from src.entrypoints.app import app
 from src.service_layer.unit_of_work import PostgresUnitOfWork
 
@@ -17,8 +18,15 @@ def client(db_url):
     return client
 
 
+@pytest.fixture
+def news_api_url(client):
+    return f'{str(client.base_url)}{settings.api.prefix}' \
+           f'{settings.api.v1.prefix}{settings.api.v1.news}/'
+
+
 @pytest.mark.asyncio
-class TestAPI:
-    async def test_get_news_list(self, client):
-        response = client.get(url="http://0.0.0.0:5555/api/v1/news/")
+class TestNewsAPI:
+
+    async def test_get_news_list(self, client, news_api_url):
+        response = client.get(url=news_api_url)
         assert response.status_code == status.HTTP_200_OK
