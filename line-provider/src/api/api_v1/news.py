@@ -6,7 +6,7 @@ from fastapi.exceptions import HTTPException
 
 from src.domain.exceptions import NewsNotFound
 from src.domain.model import News
-from ...domain.commands import NotifyAboutCreatedNews
+from ...domain import commands
 
 if TYPE_CHECKING:
     from src.service_layer.unit_of_work import AbstractUnitOfWork
@@ -67,12 +67,13 @@ async def get_news(
 async def create_news(
         data: NewsSchema,
         uow: Annotated["AbstractUnitOfWork", Depends(db_uow)],
-        broker: Annotated["RedisProducer", Depends(redis_broker)]):
+        broker: Annotated["RedisProducer", Depends(redis_broker)]
+):
     async with uow:
         news = await uow.repo.add(
             news=News(**data.dict())
         )
-    command = NotifyAboutCreatedNews(
+    command = commands.NotifyAboutCreatedNews(
         pk=news.pk,
         deadline=str(news.data.deadline),
         description=news.data.description,
@@ -86,11 +87,15 @@ async def create_news(
 @router.delete("/{news_id}", status_code=status.HTTP_200_OK)
 async def delete_news(
         news_id: str,
-        uow: Annotated["AbstractUnitOfWork", Depends(db_uow)]
+        uow: Annotated["AbstractUnitOfWork", Depends(db_uow)],
+        broker: Annotated["RedisProducer", Depends(redis_broker)]
 ):
     async with uow:
         await uow.repo.delete(pk=news_id)
         await uow.commit()
+    command = commands.NotifyAboutDeletedNews(news_id=news_id)
+    msg = json.dumps(asdict(command))
+    await broker.publish(channel="score_maker.news_deleted", message=msg)
     return "Ok"
 
 
