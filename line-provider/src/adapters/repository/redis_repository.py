@@ -51,8 +51,7 @@ class RedisRepository(AbstractRepository):
         news = list()
         for pk in pkeys:
             data = await self._get(pk=pk)
-            if datetime.strptime(data.deadline,
-                                 model.News.DATETIME_PATTERN) >= current_datetime:
+            if data.deadline >= current_datetime:
                 continue
             news.append(
                 NewsObject(pk=pk, data=data)
@@ -80,6 +79,9 @@ class RedisRepository(AbstractRepository):
         if not all([limit, offset]):
             return news_list
         return news_list[offset:offset + limit]
+
+    async def _delete(self, pk: str):
+        await self.session.delete(pk)
 
 
 def get_redis_repository() -> RedisRepository:

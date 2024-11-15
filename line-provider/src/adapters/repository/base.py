@@ -27,6 +27,9 @@ class AbstractRepository(abc.ABC):
         news = await self._update(pk=pk, **kwargs)
         return news
 
+    async def delete(self, pk: str):
+        await self._delete(pk=pk)
+
     @abc.abstractmethod
     async def _add(self, news: model.News) -> NewsObject:
         raise NotImplementedError
@@ -52,4 +55,8 @@ class AbstractRepository(abc.ABC):
                       limit: int | None = None,
                       offset: int | None = None,
                       **kwargs) -> Iterable[model.NewsData]:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    async def _delete(self, pk: str):
         raise NotImplementedError

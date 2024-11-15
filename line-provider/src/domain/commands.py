@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 
 class Command:
@@ -7,21 +6,13 @@ class Command:
 
 
 @dataclass
-class CreateNews(Command):
-    news_id: str
+class NotifyAboutCreatedNews(Command):
+    pk: str
     deadline: str
     description: str
     status: str
 
 
 @dataclass
-class DeleteNews(Command):
+class NotifyAboutDeletedNews(Command):
     news_id: str
-
-
-@dataclass
-class UpdateNews(Command):
-    news_id: str
-    deadline: Optional[str]
-    description: Optional[str]
-    status: Optional[str]

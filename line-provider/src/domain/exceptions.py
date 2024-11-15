@@ -18,3 +18,8 @@ class WrongMessage(BaseServiceException):
 class NewsNotFound(BaseServiceException):
     """Событие не найдено"""
     MESSAGE = "Событие не найдено"
+
+
+class RedisConnectionError(BaseServiceException):
+    """Ошибка соединения с Redis"""
+    MESSAGE = "Ошибка соединения с Redis. Проверьте настройки."
