@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Iterable
 
-from sqlalchemy import select
+from sqlalchemy import select, delete
 
 from src.domain import model
 from .base import AbstractRepository
@@ -74,6 +74,8 @@ class PostgresRepository(AbstractRepository):
 
     async def _update(self, pk: str, **kwargs) -> model.NewsData:
         news = await self.session.get(News, ident=pk)
+        if not news:
+            raise NewsNotFound
         for attr, value in kwargs.items():
             setattr(news, attr, value)
         await self.session.commit()
@@ -97,3 +99,7 @@ class PostgresRepository(AbstractRepository):
             for news in news_list
         ]
         return news_list
+
+    async def _delete(self, pk: str):
+        stmt = delete(News).where(News.pk == pk)
+        await self.session.execute(statement=stmt)

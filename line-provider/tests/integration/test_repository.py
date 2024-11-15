@@ -167,3 +167,20 @@ class TestPostgresRepository:
         assert len(list(all_news)) >= len(news_list)
         assert len(list(limited_news)) == limit
         assert len(list(last_limit_news)) == limit
+
+    @pytest.mark.asyncio
+    async def test_delete(self, async_session: "AsyncSession"):
+        news = db_news_model(
+            description=f'Новость_для_удаления',
+            deadline=datetime.now() + timedelta(days=1)
+        )
+        async with async_session as session:
+            session.add(news)
+            await session.commit()
+            await session.refresh(news)
+            assert news.pk
+            repo = PostgresRepository(session=session)
+            await repo.delete(pk=news.pk)
+            is_exists = await session.get(db_news_model, news.pk)
+        assert not is_exists
+

@@ -39,9 +39,6 @@ async def get_news_list(
         Параметры пагинации
         - **limit**: количество объектов
         - **offset**: количесвто пропускаемых объектов
-
-        Параметры сортировки
-        - **order_by**: наименование поля по которому сортируется список
     """
 
     async with uow:
@@ -51,7 +48,7 @@ async def get_news_list(
 
 
 @router.get("/{news_id}", response_model=NewsSchemaOut)
-async def get_news_by_id(
+async def get_news(
         news_id: str,
         uow: Annotated["AbstractUnitOfWork", Depends(db_uow)]
 ):
@@ -84,3 +81,26 @@ async def create_news(
     msg = json.dumps(asdict(command))
     await broker.publish(channel="score_maker.news_created", message=msg)
     return NewsSchemaOut(**asdict(news.data))
+
+
+@router.delete("/{news_id}", status_code=status.HTTP_200_OK)
+async def delete_news(
+        news_id: str,
+        uow: Annotated["AbstractUnitOfWork", Depends(db_uow)]
+):
+    async with uow:
+        await uow.repo.delete(pk=news_id)
+        await uow.commit()
+    return "Ok"
+
+
+@router.patch("/{news_id}", response_model=NewsSchemaOut, status_code=status.HTTP_200_OK)
+async def patch_news(
+        news_id: str,
+        data: NewsSchema,
+        uow: Annotated["AbstractUnitOfWork", Depends(db_uow)]
+):
+    async with uow:
+        edited_news = await uow.repo.update(pk=news_id, **data.dict())
+        await uow.commit()
+    return NewsSchemaOut(**asdict(edited_news))
