@@ -42,8 +42,8 @@ async def get_news_list(
     """
 
     async with uow:
-        news = await uow.repo.get_all(limit=params.limit, offset=params.offset)
-    news = [NewsSchemaOut(**asdict(row)) for row in news]
+        news = await uow.repo.get_not_expired(limit=params.limit, offset=params.offset)
+    news = [NewsSchemaOut(**asdict(row.data)) for row in news]
     return news
 
 

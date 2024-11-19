@@ -56,9 +56,11 @@ class PostgresRepository(AbstractRepository):
         ]
         return result
 
-    async def _get_not_expired(self) -> list[NewsObject]:
+    async def _get_not_expired(self,
+                               limit: int | None = None,
+                               offset: int | None = None, ) -> list[NewsObject]:
         current_datetime = datetime.now()
-        query = select(News).where(News.deadline >= current_datetime)
+        query = select(News).where(News.deadline >= current_datetime).limit(limit).offset(offset)
         news = await self.session.scalars(query)
         news = news.all()
         result = [
