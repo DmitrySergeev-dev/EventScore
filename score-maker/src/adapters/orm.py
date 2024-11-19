@@ -20,14 +20,9 @@ class NewsScore(Base):
     """События"""
     __tablename__ = "news_score"
 
-    pk: Mapped[str] = mapped_column(
-        Text,
-        primary_key=True,
-        nullable=False,
-        server_default=func.public.uuid_generate_v4()
-    )
     news_id: Mapped[str] = mapped_column(
         Text,
+        primary_key=True,
         nullable=False,
         comment="Идентификатор новости"
     )

@@ -1,0 +1,14 @@
+from pydantic import BaseModel
+
+
+class NewsScoreIn(BaseModel):
+    news_id: str
+    score: int
+
+
+class NewsScoreOut(BaseModel):
+    news_id: str
+    score: int
+    editable: bool
+
+

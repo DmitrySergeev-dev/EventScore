@@ -18,26 +18,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute(
-        """
-        CREATE OR REPLACE FUNCTION public.uuid_generate_v4()
-        RETURNS uuid
-        LANGUAGE 'c'
-            COST 1
-            VOLATILE STRICT PARALLEL SAFE 
-            AS '$libdir/uuid-ossp', 'uuid_generate_v4'
-        ;
-        """
-    )
     op.execute("CREATE SCHEMA IF NOT EXISTS news")
     op.create_table(
         'news_score',
-        sa.Column(
-            'pk',
-            sa.Text(),
-            server_default=sa.text('public.uuid_generate_v4()'),
-            nullable=False
-        ),
         sa.Column(
             'news_id',
             sa.Text(),
@@ -61,7 +44,7 @@ def upgrade() -> None:
             'score <= 5 AND score >= 1',
             name='score_value_limit'
         ),
-        sa.PrimaryKeyConstraint('pk'),
+        sa.PrimaryKeyConstraint('news_id'),
         schema='news',
         comment='Оценки новостей'
     )
