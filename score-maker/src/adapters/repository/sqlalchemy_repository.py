@@ -20,7 +20,7 @@ class PostgresRepository(AbstractRepository):
         self.session.add(db_news_score)
         await self.session.commit()
         await self.session.refresh(db_news_score)
-        return NewsScore
+        return db_news_score
 
     async def _get_by_news_id(self, news_id: str) -> NewsScore:
         db_news_score = await self.session.get(NewsScore, ident=news_id)
@@ -32,7 +32,7 @@ class PostgresRepository(AbstractRepository):
                             limit: int | None = None,
                             offset: int | None = None, ) -> list[NewsScore]:
         query = select(NewsScore).where(
-            NewsScore.editable is True
+            NewsScore.editable.is_(True)
         ).limit(limit).offset(offset)
         db_news_scores = await self.session.scalars(query)
         db_news_scores = db_news_scores.all()

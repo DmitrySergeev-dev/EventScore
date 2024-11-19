@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class NewsScoreIn(BaseModel):
     news_id: str
-    score: int
+    score: int | None = None
 
 
 class NewsScoreOut(BaseModel):
