@@ -6,13 +6,11 @@ class Command:
 
 
 @dataclass
-class NotifyAboutCreatedNews(Command):
-    pk: str
-    deadline: str
-    description: str
-    status: str
+class NotifyAboutScoredNews(Command):
+    news_hash: str
+    score_value: int
 
 
 @dataclass
 class NotifyAboutDeletedNews(Command):
-    pk: str
+    news_id: str

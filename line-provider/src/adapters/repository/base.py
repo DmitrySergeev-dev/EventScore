@@ -19,8 +19,8 @@ class AbstractRepository(abc.ABC):
         news = await self._get_by_status(status)
         return news
 
-    async def get_not_expired(self) -> list[NewsObject]:
-        news = await self._get_not_expired()
+    async def get_not_expired(self, *args, **kwargs) -> list[NewsObject]:
+        news = await self._get_not_expired(*args, **kwargs)
         return news
 
     async def update(self, pk: str, **kwargs) -> model.NewsData:
@@ -39,7 +39,7 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def _get_not_expired(self) -> list[NewsObject]:
+    async def _get_not_expired(self, *args, **kwargs) -> list[NewsObject]:
         raise NotImplementedError
 
     @abc.abstractmethod

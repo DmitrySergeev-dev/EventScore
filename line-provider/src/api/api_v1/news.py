@@ -42,8 +42,8 @@ async def get_news_list(
     """
 
     async with uow:
-        news = await uow.repo.get_all(limit=params.limit, offset=params.offset)
-    news = [NewsSchemaOut(**asdict(row)) for row in news]
+        news = await uow.repo.get_not_expired(limit=params.limit, offset=params.offset)
+    news = [NewsSchemaOut(**asdict(row.data)) for row in news]
     return news
 
 
@@ -80,7 +80,7 @@ async def create_news(
         status=news.data.status
     )
     msg = json.dumps(asdict(command))
-    await broker.publish(channel="score_maker.news_created", message=msg)
+    await broker.publish(channel="NewsCreated", message=msg)
     return NewsSchemaOut(**asdict(news.data))
 
 
@@ -95,7 +95,7 @@ async def delete_news(
         await uow.commit()
     command = commands.NotifyAboutDeletedNews(news_id=news_id)
     msg = json.dumps(asdict(command))
-    await broker.publish(channel="score_maker.news_deleted", message=msg)
+    await broker.publish(channel="NewsDeleted", message=msg)
     return "Ok"
 
 

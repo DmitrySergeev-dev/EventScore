@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 
 
-class Command:
+class Event:
     pass
 
 
 @dataclass
-class NotifyAboutCreatedNews(Command):
+class NewsCreated(Event):
     pk: str
     deadline: str
     description: str
@@ -14,5 +14,5 @@ class NotifyAboutCreatedNews(Command):
 
 
 @dataclass
-class NotifyAboutDeletedNews(Command):
+class NewsDeleted(Event):
     pk: str
