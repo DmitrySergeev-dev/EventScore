@@ -31,22 +31,10 @@ services:
     depends_on:
       - db
       - redis
-    restart: always
-    environment:
-      LINE_PROVIDER_CONFIG__REDIS__URL: redis://redis:6379
-      LINE_PROVIDER_CONFIG__DB__URL: postgresql+asyncpg://user:password@db:5432/line_provider
-    command: bash -c "./scripts/wait_for_db.sh && alembic upgrade head || echo 'Alembic upgrade failed' && uvicorn src.entrypoints.app:app --host 0.0.0.0 --port 8005"
+    restart: on-failure:5  # Restart the container up to 5 times on failure
+    env_file:
+      - .env
+    command: bash -c "./scripts/wait_for_db.sh && alembic upgrade head || echo 'Alembic upgrade failed' && python ./src/entrypoints/app.py"
     ports:
       - "8555:8005"
-
-  test_db:
-    restart: always
-    image: postgres
-    container_name: test_line-provider-db
-    environment:
-      POSTGRES_DB: test_line_provider
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5434:5432"
 

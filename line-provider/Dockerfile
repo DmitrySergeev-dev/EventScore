@@ -26,14 +26,15 @@ RUN poetry config virtualenvs.create false
 RUN poetry install
 
 # Копируем остальной код приложения
-#COPY .env ./
+COPY .env ./
 COPY scripts ./scripts
 COPY alembic.ini ./
 COPY migrations ./migrations
 COPY src ./src
 
 # Указываем команду для запуска приложения
-CMD ["uvicorn", "src.entrypoints.app:app", "--host", "0.0.0.0", "--port", "8005"]
+CMD ["python", "src/entrypoints/main.py"]
+#CMD ["uvicorn", "src.entrypoints.app:app", "--host", "0.0.0.0", "--port", "8005"]
 
 
 

@@ -76,7 +76,7 @@ async def patch_score(
     async with uow:
         score = await uow.repo.update(news_id=news_id, **data.dict())
         await uow.commit()
-    command = commands.NotifyAboutScoredNews(news_hash=score.news_id, score_value=score.score)
+    command = commands.NotifyAboutScoredNews(pk=score.news_id, score_value=score.score)
     msg = json.dumps(asdict(command))
     await broker.publish(channel="NewsScored", message=msg)
     return score
