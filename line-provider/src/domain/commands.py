@@ -15,4 +15,4 @@ class NotifyAboutCreatedNews(Command):
 
 @dataclass
 class NotifyAboutDeletedNews(Command):
-    news_id: str
+    pk: str

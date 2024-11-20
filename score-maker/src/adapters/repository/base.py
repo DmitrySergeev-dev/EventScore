@@ -15,8 +15,8 @@ class AbstractRepository(abc.ABC):
         return score
 
     async def get_editable(self, *args, **kwargs) -> list[NewsScore]:
-        news = await self._get_editable(*args, **kwargs)
-        return news
+        scores = await self._get_editable(*args, **kwargs)
+        return scores
 
     async def update(self, news_id: str, **kwargs) -> NewsScore:
         score = await self._update(news_id=news_id, **kwargs)

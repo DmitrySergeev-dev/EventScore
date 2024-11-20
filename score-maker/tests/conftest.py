@@ -26,22 +26,22 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture(scope="session")
-def redis_url():
-    return "redis://0.0.0.0:6380/1"
-
-
-@pytest.fixture(scope="session")
-def redis_session(redis_url):
-    return Redis.from_url(url=redis_url, decode_responses=True)
-
-
-@pytest.fixture(scope='function', autouse=True)
-def flush_redis(redis_url):
-    redis = SyncRedis.from_url(url=redis_url)
-    redis.flushdb()
-    yield
-    redis.flushdb()
+# @pytest.fixture(scope="session")
+# def redis_url():
+#     return "redis://0.0.0.0:6380/1"
+#
+#
+# @pytest.fixture(scope="session")
+# def redis_session(redis_url):
+#     return Redis.from_url(url=redis_url, decode_responses=True)
+#
+#
+# @pytest.fixture(scope='function', autouse=True)
+# def flush_redis(redis_url):
+#     redis = SyncRedis.from_url(url=redis_url)
+#     redis.flushdb()
+#     yield
+#     redis.flushdb()
 
 
 @pytest.fixture(scope="session")
