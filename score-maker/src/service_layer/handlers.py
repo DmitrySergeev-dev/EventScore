@@ -18,7 +18,7 @@ async def create_news_score_row(event: events.NewsCreated,
 async def delete_news_score_row(event: events.NewsDeleted,
                                 uow: "AbstractUnitOfWork"):
     async with uow:
-        await uow.repo.delete(pk=event.pk)
+        await uow.repo.delete(news_id=event.pk)
         await uow.commit()
 
 

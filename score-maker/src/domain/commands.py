@@ -7,10 +7,6 @@ class Command:
 
 @dataclass
 class NotifyAboutScoredNews(Command):
-    news_hash: str
+    pk: str
     score_value: int
 
-
-@dataclass
-class NotifyAboutDeletedNews(Command):
-    news_id: str

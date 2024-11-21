@@ -93,7 +93,7 @@ async def delete_news(
     async with uow:
         await uow.repo.delete(pk=news_id)
         await uow.commit()
-    command = commands.NotifyAboutDeletedNews(news_id=news_id)
+    command = commands.NotifyAboutDeletedNews(pk=news_id)
     msg = json.dumps(asdict(command))
     await broker.publish(channel="NewsDeleted", message=msg)
     return "Ok"

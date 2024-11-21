@@ -13,7 +13,7 @@ async def update_news_status(event: events.NewsScored,
                              uow: "AbstractUnitOfWork"):
     status = News.define_status_by_score(score_value=event.score_value)
     async with uow:
-        await uow.repo.update(pk=event.news_hash, status=status)
+        await uow.repo.update(pk=event.pk, status=status)
 
 
 EVENT_HANDLERS: Dict[Type[events.Event], List[Callable]] = {

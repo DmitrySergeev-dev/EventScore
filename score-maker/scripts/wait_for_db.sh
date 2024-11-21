@@ -1,5 +1,5 @@
 #!/bin/bash
-until (echo > /dev/tcp/line_provider_db/5432) &>/dev/null; do
+until (echo > /dev/tcp/score_maker_db/5432) &>/dev/null; do
   echo "Waiting for database connection..."
   sleep 1
 done

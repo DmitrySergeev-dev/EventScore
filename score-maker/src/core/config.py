@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -30,6 +31,10 @@ class DBConfig(BaseModel):
     url: str
 
 
+class LoggingConfig(BaseModel):
+    level: str = logging.INFO
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=(
@@ -44,6 +49,7 @@ class Settings(BaseSettings):
     api: ApiPrefix = ApiPrefix()
     redis: RedisConfig
     db: DBConfig
+    log: LoggingConfig
 
 
 settings = Settings()

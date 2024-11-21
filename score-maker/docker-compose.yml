@@ -10,21 +10,21 @@ services:
       - ./docker-volumes/redis/data:/data
       - ./docker-volumes/redis/configs/local-redis-stack.conf:/redis-stack.conf
 
-  line_provider_db:
+  db:
     restart: always
     image: postgres
-    container_name: line_provider_db
+    container_name: score-maker-db
     environment:
-      POSTGRES_DB: line_provider
+      POSTGRES_DB: score_maker_db
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
     ports:
-      - "5433:5432"
+      - "5435:5432"
     volumes:
       - ./docker-volumes/db:/var/lib/postgresql/data
 
   app:
-    container_name: line_provider_service
+    container_name: score_maker_service
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -36,5 +36,5 @@ services:
       - .env
     command: bash -c "./scripts/wait_for_db.sh && alembic upgrade head || echo 'Alembic upgrade failed' && python ./src/entrypoints/app.py"
     ports:
-      - "8555:8005"
+      - "8556:8006"
 

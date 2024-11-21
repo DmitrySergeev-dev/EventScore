@@ -7,5 +7,5 @@ class Event:
 
 @dataclass
 class NewsScored(Event):
-    news_hash: str
+    pk: str
     score_value: int

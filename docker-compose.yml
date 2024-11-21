@@ -1,0 +1,68 @@
+services:
+  redis:
+    restart: always
+    image: redis/redis-stack:6.2.6-v17
+    container_name: redis
+    ports:
+      - "6380:6379"
+      - "8001:8001"
+    volumes:
+      - ./docker-volumes/redis/data:/data
+      - ./docker-volumes/redis/configs/local-redis-stack.conf:/redis-stack.conf
+
+  line_provider_db:
+    restart: always
+    image: postgres
+    container_name: line_provider_db
+    environment:
+      POSTGRES_DB: line_provider
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./docker-volumes/line_provider_db:/var/lib/postgresql/data
+
+  line_provider_app:
+    container_name: line_provider_service
+    build:
+      context: ./line-provider
+      dockerfile: Dockerfile
+    depends_on:
+      - line_provider_db
+      - redis
+    restart: on-failure:5  # Restart the container up to 5 times on failure
+    env_file:
+      - ./line-provider/.env
+    command: bash -c "./scripts/wait_for_db.sh && alembic upgrade head || echo 'Alembic upgrade failed' && python ./src/entrypoints/app.py"
+    ports:
+      - "8555:8005"
+
+
+  score_maker_db:
+    restart: always
+    image: postgres
+    container_name: score_maker_db
+    environment:
+      POSTGRES_DB: score_maker_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5435:5432"
+    volumes:
+      - ./docker-volumes/score_maker_db:/var/lib/postgresql/data
+
+  score_maker_app:
+    container_name: score_maker_service
+    build:
+      context: ./score-maker
+      dockerfile: Dockerfile
+    depends_on:
+      - score_maker_db
+      - redis
+    restart: on-failure:5  # Restart the container up to 5 times on failure
+    env_file:
+      - ./score-maker/.env
+    command: bash -c "./scripts/wait_for_db.sh && alembic upgrade head || echo 'Alembic upgrade failed' && python ./src/entrypoints/app.py"
+    ports:
+      - "8556:8006"
