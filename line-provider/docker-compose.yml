@@ -10,10 +10,10 @@ services:
       - ./docker-volumes/redis/data:/data
       - ./docker-volumes/redis/configs/local-redis-stack.conf:/redis-stack.conf
 
-  db:
+  line_provider_db:
     restart: always
     image: postgres
-    container_name: line-provider-db
+    container_name: line_provider_db
     environment:
       POSTGRES_DB: line_provider
       POSTGRES_USER: user
