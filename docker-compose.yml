@@ -66,3 +66,22 @@ services:
     command: bash -c "./scripts/wait_for_db.sh && alembic upgrade head || echo 'Alembic upgrade failed' && python ./src/entrypoints/app.py"
     ports:
       - "8556:8006"
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./docker-volumes/grafana:/var/lib/grafana
+    depends_on:
+      - prometheus
