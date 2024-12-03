@@ -5,3 +5,6 @@ rm_and_clean_containers:  ## Остановить, удалить и очист�
 
 rm_and_clean_images:  ## Удалить и очистить все образы
 	docker rmi $$(docker images -a -q) && docker system prune -f
+
+start: ## Запустить контейнеры Docker
+	docker-compose up --build -d

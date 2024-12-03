@@ -16,6 +16,7 @@ from src.api import router as api_router
 from src.core.logging_config import LOGGING_CONFIG
 from src.core.config import settings
 from src.entrypoints.redis_eventconsumer import run_event_listener
+from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI(
     title="Score Maker",
@@ -25,6 +26,8 @@ app.include_router(
     api_router,
     prefix=settings.api.prefix
 )
+
+Instrumentator().instrument(app=app).expose(app=app)
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger(__name__)
