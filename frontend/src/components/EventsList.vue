@@ -1,9 +1,12 @@
 <script setup>
-  const props = defineProps({
-    todo: Object
-  })
+  const props = defineProps(['news'])
+  console.log(props.news)
 </script>
 
 <template>
-  <li>{{ todo.text }}</li>
+  <ul>
+        <li v-for="item in props.news" :key="item.pk">
+            {{ item.description }}: {{ item.status }}
+        </li>
+  </ul>
 </template>

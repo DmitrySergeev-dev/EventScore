@@ -8,8 +8,7 @@ export async function fetchNews() {
         if (!response.ok) {
             throw new Error(`Ошибка сети: ${response.status} ${response.statusText}`);
         }
-        let events = await response.json();
-        return events;
+        return await response.json();
     } catch (error) {
         console.error('Ошибка при получении событий:', error);
         return [];
