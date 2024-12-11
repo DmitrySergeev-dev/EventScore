@@ -10,7 +10,7 @@ sys.path.insert(0, VENV_PATH.as_posix())
 
 import uvicorn
 from fastapi import FastAPI
-
+from fastapi.middleware.cors import CORSMiddleware
 from src import bootstrap
 from src.api import router as api_router
 from src.core.logging_config import LOGGING_CONFIG
@@ -21,6 +21,18 @@ app = FastAPI(
     title="Line Provider",
     description="Сервис для публикации событий"
 )
+
+# Настройка CORS
+origins = ["*"]  # Другие разрешенные домены
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Список разрешенных доменов
+    allow_credentials=True,
+    allow_methods=["*"],  # Разрешить все методы (GET, POST и т.д.)
+    allow_headers=["*"],  # Разрешить все заголовки
+)
+
 app.include_router(
     api_router,
     prefix=settings.api.prefix
