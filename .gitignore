@@ -55,3 +55,7 @@ pylint-output.txt
 *.DS_Store
 *.egg
 *.egg-info/
+
+#Front
+/node_modules/
+/.vscode/
