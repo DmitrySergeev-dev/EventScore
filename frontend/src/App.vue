@@ -1,15 +1,37 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { fetchNews } from './api/news.js'
-import EventsList  from './components/EventsList.vue'
+import { ref, computed } from 'vue'
+import Home from './pages/Home.vue'
+import About from './pages/About.vue'
+import NotFound from './pages/NotFound.vue'
+import Navbar from './components/Navbar.vue'
 
-const news = ref([]) // Инициализируем news как пустой массив
+const routes = {
+  '/': Home,
+  '/about': About,
+  '/notFound': NotFound
+}
 
-onMounted(async () => {
-    news.value = await fetchNews() // Обновляем значение news после получения данных
+const currentPath = ref(window.location.hash)
+
+window.addEventListener('hashchange', () => {
+  currentPath.value = window.location.hash
+})
+
+const currentView = computed(() => {
+  return routes[currentPath.value.slice(1) || '/']
 })
 </script>
 
 <template>
-  <EventsList :news=news />
+  <div class="app-container"> <!-- Добавьте контейнер -->
+    <Navbar />
+    <component :is="currentView" />
+  </div>
 </template>
+
+
+
+
+
+
+

@@ -1,0 +1,53 @@
+<script>
+export default {
+  name: 'Navbar',
+};
+</script>
+
+<template>
+  <nav class="navbar">
+    <div class="logo">MyWebsite</div>
+    <ul class="nav-links">
+      <li><a href="#/">Главная</a></li>
+      <li><a href="#/about">О нас</a></li>
+    </ul>
+  </nav>
+</template>
+
+<style scoped>
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #333;
+  padding: 10px 20px;
+}
+
+.logo {
+  color: white;
+  font-size: 24px;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links li {
+  margin-left: 20px;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  transition: background-color 0.3s;
+}
+
+.nav-links a:hover {
+  background-color: #575757;
+  border-radius: 4px;
+}
+</style>
