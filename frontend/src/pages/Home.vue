@@ -1,21 +1,27 @@
 <script setup>
 import {ref, onMounted} from 'vue'
-import {fetchNews} from '@/api/news.js'
+import {fetchNews, createNews, deleteNews} from '@/api/news.ts'
 import NewsList from '@/components/NewsList.vue'
 import NewsForm from '@/components/NewsForm.vue'
 
-const news = ref([]) // Инициализируем news как пустой массив
+const news = ref([])
 
 onMounted(async () => {
-  news.value = await fetchNews() // Обновляем значение news после получения данных
+  news.value = await fetchNews()
 })
 
-function addNewsItem(newsItem){
-  news.value.push(newsItem)
+async function addNewsItem(newsItem){
+  await createNews(newsItem)
+  news.value = await fetchNews()
 }
+
+async function removeNewsItem(newsItem) {
+    await deleteNews(newsItem.pk)
+    news.value = await fetchNews()
+    }
 </script>
 
 <template>
   <NewsForm @newsCreated="addNewsItem" />
-  <NewsList :news=news />
+  <NewsList :news=news @removeNewsItem="removeNewsItem"/>
 </template>

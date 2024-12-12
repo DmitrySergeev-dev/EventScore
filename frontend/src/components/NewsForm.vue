@@ -31,7 +31,7 @@ function createNewsItem() {
     <my-input
         v-model="newsItem.deadline"
         type="text"
-        placeholder="Срок истечения"
+        placeholder="Дедлайн"
     />
     <my-button
         style="align-self: flex-end; margin-top: 15px"

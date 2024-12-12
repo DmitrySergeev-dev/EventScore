@@ -6,7 +6,7 @@ export default {
 
 <template>
   <nav class="navbar">
-    <div class="logo">MyWebsite</div>
+    <div class="logo">Новости</div>
     <ul class="nav-links">
       <li><a href="#/">Главная</a></li>
       <li><a href="#/about">О нас</a></li>
