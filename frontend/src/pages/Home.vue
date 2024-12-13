@@ -10,18 +10,18 @@ onMounted(async () => {
   news.value = await fetchNews()
 })
 
-async function addNewsItem(newsItem){
+const addNewsItem = async (newsItem) => {
   await createNews(newsItem)
   news.value = await fetchNews()
 }
 
-async function removeNewsItem(newsItem) {
-    await deleteNews(newsItem.pk)
-    news.value = await fetchNews()
-    }
+const removeNewsItem = async (newsItem) => {
+  await deleteNews(newsItem.pk)
+  news.value = await fetchNews()
+}
 </script>
 
 <template>
-  <NewsForm @newsCreated="addNewsItem" />
-  <NewsList :news=news @removeNewsItem="removeNewsItem"/>
+  <NewsForm @newsCreated="addNewsItem"/>
+  <NewsList :news="news" @removeNewsItem="removeNewsItem"/>
 </template>

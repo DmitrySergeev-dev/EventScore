@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import NewsItem from "@/components/NewsItem.vue";
+import {defineProps} from "vue";
 
 interface News {
   pk: string;
@@ -7,10 +8,7 @@ interface News {
   status: string;
   deadline: string;
 }
-
-const props = defineProps<{
-  news: [News];
-}>();
+const props = defineProps(['news'])
 </script>
 
 <template>

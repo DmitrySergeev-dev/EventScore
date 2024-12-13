@@ -20,7 +20,7 @@ export async function createNews(data: Object) {
     const url = `${apiUrl}/news/`;
 
     try {
-        fetch(url, {
+        const response = await fetch(url, {
             method: 'POST', // Указываем метод запроса
             headers: {
                 'Content-Type': 'application/json' // Указываем тип контента
@@ -40,11 +40,15 @@ export async function createNews(data: Object) {
 
 export async function deleteNews(pk: string) {
     const apiUrl = import.meta.env.VITE_LINE_PROVIDER_API_URL;
-    const url = `${apiUrl}/news/${pk}`;
+    const url = `${apiUrl}/news/${pk}/`;
+    console.log(url)
 
     try {
-        fetch(url, {
+        const response = await fetch(url, {
             method: 'DELETE', // Указываем метод запроса
+            headers: {
+                'Content-Type': 'application/json' // Указываем тип контента
+            }
         })
 
         if (!response.ok) {
