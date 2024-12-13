@@ -29,7 +29,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
     depends_on:
-      - db
+      - line_provider_db
       - redis
     restart: on-failure:5  # Restart the container up to 5 times on failure
     env_file:
